@@ -1,0 +1,25 @@
+{
+  "name": "banz",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jackgimre/banz-bot.git"
+  },
+  "author": "jack/lucky",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^12.2.0",
+    "opusscript": "0.0.7",
+    "prism-media": "github:hydrabolt/prism-media",
+    "spotify-url-info": "^1.4.0",
+    "youtube-playlist-summary": "^2.1.4",
+    "youtube-search": "^1.1.4",
+    "ytdl-core": "^3.1.2"
+  }
+}
