@@ -585,7 +585,7 @@ client.on('message', async message => {
             }).catch(err => console.log(err)); 
         }
     }
-
+    //please
     function playQueue()
     {
         const streamOptions = { seek: 0, volume: volume };
