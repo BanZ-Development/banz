@@ -8,6 +8,7 @@ var search = require('youtube-search');
 const fs = require('fs');
 const { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } = require('constants');
 var PlaylistSummary = require('youtube-playlist-summary');
+const { time } = require('console');
 var opts = {
     maxResults: 1,
     key: config["youtube-api"],
@@ -69,6 +70,8 @@ var skip_perm = 'SEND_MESSAGES';
 
 var volume = 1;
 
+var songLimit = 10;
+
 
 var queue = [];
 var servers = {};
@@ -113,7 +116,12 @@ client.once('ready', () => {
 });
 
 client.on('message', async message => {
-    var server = servers[message.guild.id];
+    var server = message.guild.id;
+
+    if(!message.content.startsWith(prefix) || message.author.bot) return;
+    const args = message.content.slice(prefix.length).split(/ +/);
+    const command = args.shift().toLowerCase();
+
     if(!servers[message.guild.id]) servers[message.guild.id] = {
         queue: []
     }
@@ -122,10 +130,6 @@ client.on('message', async message => {
         volume: 1
     }
 
-
-    if(!message.content.startsWith(prefix) || message.author.bot) return;
-    const args = message.content.slice(prefix.length).split(/ +/);
-    const command = args.shift().toLowerCase();
 
     var split = message.content.split(' ');
     if(split[0] == 'banzprefix')
@@ -146,6 +150,8 @@ client.on('message', async message => {
             message.reply('It seems that you do not have the required permission ' + '`' + prefix_perm + '`');
         }
     }
+
+
 
     if(command === 'info') //complete
     {
@@ -270,18 +276,7 @@ client.on('message', async message => {
                 channel.join().then(connection => {
                     console.log("Successfully connected.");
                     connection.voice.setSelfDeaf(true);
-                    const streamOptions = { seek: 0, volume: volume };
-                    var voiceChannel = message.member.voice.channel;
-                    voiceChannel.join().then(connection => {
-                        const stream = ytdl('https://www.youtube.com/watch?v=kCQAzVvz8Sg&feature=youtu.be', { filter : 'audioonly' });
-                        const dispatcher = connection.play(stream, streamOptions);
-                        dispatcher.on('finish', function() {
-                            if(server.queue[0])
-                            {
-                                server.queue.shift();
-                            }
-                        });
-                    }).catch(err => console.log(err));   
+                    play('https://www.youtube.com/watch?v=kCQAzVvz8Sg&feature=youtu.be');
 
 
                     embed = new Discord.MessageEmbed()
@@ -312,16 +307,6 @@ client.on('message', async message => {
         {
             if(message.member.permissions.has(play_perm))
             {   
-                var volumeServers = fs.readFileSync(config.volume, "utf8").split(';');
-                for(i=0;i<volumeServers.length;i++)
-                {
-                    var volumeServer = volumeServers[i].split(':');
-                    if(message.guild.id == volumeServer[0])
-                    {
-                        volume = volumeServer[1];
-                    }
-                }
-
                 if(!args[0])
                 {
                     embed = new Discord.MessageEmbed()
@@ -358,7 +343,7 @@ client.on('message', async message => {
     
                         if(results)
                         {
-                            if(!server.queue[0])
+                            if(!servers[message.guild.id].queue[0])
                             {
                                 embed = new Discord.MessageEmbed()
                                 .setColor(colors.indigo)
@@ -436,9 +421,9 @@ client.on('message', async message => {
             {
                 if(!message.member.voice.channel) return message.channel.send('Please connect to a voice channel');
                 if(!message.guild.me.voice.channel) return message.channel.send('Sorry, the bot isn\'t connected to the guild');
-                if(server.queue[0])
+                if(servers[message.guild.id].queue[0])
                 {
-                    server.queue = [];
+                    servers[message.guild.id].queue = [];
                 }
 
                 message.guild.me.voice.channel.leave();
@@ -570,11 +555,9 @@ client.on('message', async message => {
 
     function play(link)
     {
-
-
-        if(server.queue[0])
+        if(servers[message.guild.id].queue[0])
         {
-            server.queue.push(link);
+            servers[message.guild.id].queue.push(link);
             embed = new Discord.MessageEmbed()
             .setColor(colors.indigo)
             .setTitle(`**Added to Queue**`)
@@ -584,19 +567,19 @@ client.on('message', async message => {
         }
         else
         {
-            server.queue.push(link);
+            servers[message.guild.id].queue.push(link);
             const streamOptions = { seek: 0, volume: volume };
             var voiceChannel = message.member.voice.channel;
             voiceChannel.join().then(connection => {
-                const stream = ytdl(server.queue[0], { filter : 'audioonly' });
+                const stream = ytdl(link, { filter : 'audioonly' });
                 const dispatcher = connection.play(stream, streamOptions);
                 dispatcher.on("finish", function() {
                     if(!loop_enable)
                     {
-                        server.queue.shift();
+                        servers[message.guild.id].queue.shift();
                     }
-                    if(server.queue[0]){
-                        playQueue(server.queue[0]);
+                    if(servers[message.guild.id].queue[0]){
+                        playQueue();
                     } else {
 
                     }
@@ -605,21 +588,21 @@ client.on('message', async message => {
         }
     }
 
-    function playQueue(queueNum)
+    function playQueue()
     {
         const streamOptions = { seek: 0, volume: volume };
         var voiceChannel = message.member.voice.channel;
         console.log(voiceChannel);
         voiceChannel.join().then(connection => {
-            const stream = ytdl(queueNum, { filter : 'audioonly' });
+            const stream = ytdl(servers[message.guild.id].queue[0], { filter : 'audioonly' });
             const dispatcher = connection.play(stream, streamOptions);
             dispatcher.on("finish", function() {
                 if(!loop_enable)
                 {
-                    server.queue.shift();
+                    servers[message.guild.id].queue.shift();
                 }
-                else if(server.queue[0]){
-                    playQueue(server.queue[0]);
+                else if(servers[message.guild.id].queue[0]){
+                    playQueue();
                 } else {
                 }
             });
@@ -630,10 +613,10 @@ client.on('message', async message => {
     {
         if(message.member.permissions.has(skip_perm))
         {
-            if(server.queue[0])
+            if(servers[message.guild.id].queue[0])
             {
-                server.queue.shift();
-                playQueue(server.queue[0]);
+                servers[message.guild.id].queue.shift();
+                playQueue(servers[message.guild.id].queue[0]);
                 embed = new Discord.MessageEmbed()
                 .setColor(colors.indigo)
                 .setTitle('**Skipped Song**')
@@ -646,7 +629,7 @@ client.on('message', async message => {
                 .setColor(colors.indigo)
                 .setTitle('**ERROR**')
                 .addField('Error:','You can\'t skip if nothing is in the queue')
-                .addField('Queue:',server.queue)
+                .addField('Queue:',servers[message.guild.id].queue)
                 .setFooter(`Requested by - ${message.author.username}`);
                 message.channel.send({embed: embed});
             }
@@ -686,7 +669,7 @@ client.on('message', async message => {
                 embed = new Discord.MessageEmbed()
                 .setColor(colors.indigo)
                 .setTitle('**Queue**')
-                .addField('Length:',server.queue.length)
+                .addField('Length:',servers[message.guild.id].queue.length)
                 .setFooter(`Requested by - ${message.author.username}`);
                 message.channel.send({embed: embed});
             }
@@ -724,7 +707,7 @@ client.on('message', async message => {
 
     function shuffle()
     {
-        server.queue.sort((a,b)=> 0.5 - Math.random());
+        servers[message.guild.id].queue.sort((a,b)=> 0.5 - Math.random());
     }
 
     if(command === 'clear') //complete
@@ -733,7 +716,7 @@ client.on('message', async message => {
         {
             if(message.member.permissions.has(clear_perm))
             {
-                server.queue = [];
+                servers[message.guild.id].queue = [];
                 embed = new Discord.MessageEmbed()
                 .setColor(colors.indigo)
                 .setTitle('**Queue Cleared**')
@@ -782,49 +765,49 @@ client.on('message', async message => {
                 }
                 else if(args[0] == 'top')
                 {
-                    radio('https://www.youtube.com/playlist?list=PLDIoUOhQQPlXr63I_vwF9GD8sAKh77dWU');
+                    playlist('https://www.youtube.com/playlist?list=PLDIoUOhQQPlXr63I_vwF9GD8sAKh77dWU');
                 }
                 else if(args[0] == 'juice')
                 {
-                    radio('https://www.youtube.com/playlist?list=PLeZN5uWYmxWfKMV0Aqgu0hQ90oWkAWtbC');
+                    playlist('https://www.youtube.com/playlist?list=PLeZN5uWYmxWfKMV0Aqgu0hQ90oWkAWtbC');
                 }
         
                 else if(args[0] == 'lakey')
                 {
-                    radio('https://www.youtube.com/playlist?list=PLzQMiS2VoQIVnm_7bh56lb48OmdCMU6Fx');
+                    playlist('https://www.youtube.com/playlist?list=PLzQMiS2VoQIVnm_7bh56lb48OmdCMU6Fx');
                 }
         
                 else if(args[0] == 'lofi')
                 {
-                    radio('https://www.youtube.com/playlist?list=PL6NdkXsPL07KiewBDpJC1dFvxEubnNOp1');
+                    playlist('https://www.youtube.com/playlist?list=PL6NdkXsPL07KiewBDpJC1dFvxEubnNOp1');
                 }
                 else if(args[0] == 'jazz')
                 {
-                    radio('https://www.youtube.com/playlist?list=PL8F6B0753B2CCA128');
+                    playlist('https://www.youtube.com/playlist?list=PL8F6B0753B2CCA128');
                 }
                 else if(args[0] == 'rap')
                 {
-                    radio('https://www.youtube.com/playlist?list=PLetgZKHHaF-Zq1Abh-ZGC4liPd_CV3Uo4');
+                    playlist('https://www.youtube.com/playlist?list=PLetgZKHHaF-Zq1Abh-ZGC4liPd_CV3Uo4');
                 }
                 else if(args[0] == 'country')
                 {
-                    radio('https://www.youtube.com/playlist?list=PLlYKDqBVDxX0Qzmoi2-vvHJjOAy3tRPQ_');
+                    playlist('https://www.youtube.com/playlist?list=PLlYKDqBVDxX0Qzmoi2-vvHJjOAy3tRPQ_');
                 }
                 else if(args[0] == 'anime')
                 {
-                    radio('https://www.youtube.com/playlist?list=PLjNlQ2vXx1xbt30X8TcUfNzw_akVISXEu');
+                    playlist('https://www.youtube.com/playlist?list=PLjNlQ2vXx1xbt30X8TcUfNzw_akVISXEu');
                 }
                 else if(args[0] == 'anime')
                 {
-                    radio('https://www.youtube.com/playlist?list=PLjNlQ2vXx1xbt30X8TcUfNzw_akVISXEu');
+                    playlist('https://www.youtube.com/playlist?list=PLjNlQ2vXx1xbt30X8TcUfNzw_akVISXEu');
                 }
                 else if(args[0] == 'blues')
                 {
-                    radio('https://www.youtube.com/playlist?list=PL2140A0411C65DD13');
+                    playlist('https://www.youtube.com/playlist?list=PL2140A0411C65DD13');
                 }
                 else if(args[0] == 'kpop')
                 {
-                    radio('https://www.youtube.com/playlist?list=PLOHoVaTp8R7dfrJW5pumS0iD_dhlXKv17');
+                    playlist('https://www.youtube.com/playlist?list=PLOHoVaTp8R7dfrJW5pumS0iD_dhlXKv17');
                 }
                 else
                 {
@@ -854,35 +837,36 @@ client.on('message', async message => {
                 for(i=0;i<result.total;i++)
                 {
                     var total = result.total -1;
-                    if(server.queue.length-total==previousQueue)
+                    var totalInt = parseInt(total)+1;
+                    if(servers[message.guild.id].queue.length-total==previousQueue)
                     {
                         embed = new Discord.MessageEmbed()
                         .setColor(colors.indigo)
-                        .setTitle('Now Playing: `'+total+'` Tracks')
+                        .setTitle('Now Playing: `'+totalInt+'` Tracks')
                         .addField('Playlist:',result.playlistTitle)
                         .setFooter(`Requested by - ${message.author.username}`);
                         message.channel.send({embed: embed});
                     }
                     var link = result.items[i].videoUrl;
-                    if(server.queue[0])
+                    if(servers[message.guild.id].queue[0])
                     {
-                        server.queue.push(link);
+                        servers[message.guild.id].queue.push(link);
                     }
                     else
                     {
-                        server.queue.push(link);
+                        servers[message.guild.id].queue.push(link);
                         const streamOptions = { seek: 0, volume: volume };
                         var voiceChannel = message.member.voice.channel;
                         voiceChannel.join().then(connection => {
-                            const stream = ytdl(server.queue[0], { filter : 'audioonly' });
+                            const stream = ytdl(servers[message.guild.id].queue[0], { filter : 'audioonly' });
                             const dispatcher = connection.play(stream, streamOptions);
                             dispatcher.on("finish", function() {
                                 if(!loop_enable)
                                 {
-                                    server.queue.shift();
+                                    servers[message.guild.id].queue.shift();
                                 }
-                                if(server.queue[0]){
-                                    playQueue(server.queue[0]);
+                                if(servers[message.guild.id].queue[0]){
+                                    playQueue(servers[message.guild.id].queue[0]);
                                 } else {
             
                                 }
@@ -902,39 +886,31 @@ client.on('message', async message => {
             .then((result) => {
             if(result)
             {
-                var previousQueue = server.queue.length;
-                if(result.total >= 10)
+                var previousQueue = servers[message.guild.id].queue.length;
+                if(result.total >= songLimit)
                 {
-                    for(i=0;i<=10;i++)
+                    var times = 1;
+                    var groups = [];
+                    var totalInt = 0;
+                    for(i=0;i<=result.total;i++)
                     {
-                        var total = result.total -1;
-                        if(server.queue.length-total==previousQueue)
-                        {
-                            embed = new Discord.MessageEmbed()
-                            .setColor(colors.indigo)
-                            .setTitle('Now Playing The `'+args[0].toUpperCase()+'` Radio')
-                            .setFooter(`Requested by - ${message.author.username}`);
-                            message.channel.send({embed: embed});
-                        }
+                        totalInt++;
                         var link = result.items[i].videoUrl;
-                        server.queue.push(link);
-                        const streamOptions = { seek: 0, volume: volume };
-                        var voiceChannel = message.member.voice.channel;
-                        voiceChannel.join().then(connection => {
-                            const stream = ytdl(server.queue[0], { filter : 'audioonly' });
-                            const dispatcher = connection.play(stream, streamOptions);
-                            dispatcher.on("finish", function() {
-                                if(!loop_enable)
-                                {
-                                    server.queue.shift();
-                                }
-                                if(server.queue[0]){
-                                    playQueue(server.queue[0]);
-                                } else {
-            
-                                }
-                            });
-                        }).catch(err => console.log(err)); 
+                        var local = [];
+                        local.push(link);
+                        if(i==songLimit*times)
+                        {
+                            groups.push(local);
+                            local = [];
+                            times++;
+                        }
+                        else
+                        {
+                            if(totalInt == total)
+                            {
+                                return;
+                            }
+                        }
                     }
  
                 }
@@ -943,7 +919,7 @@ client.on('message', async message => {
                     for(i=0;i<result.total;i++)
                     {
                         var total = result.total -1;
-                        if(server.queue.length-total==previousQueue)
+                        if(servers[message.guild.id].queue.length-total==previousQueue)
                         {
                             embed = new Discord.MessageEmbed()
                             .setColor(colors.indigo)
@@ -952,19 +928,19 @@ client.on('message', async message => {
                             message.channel.send({embed: embed});
                         }
                         var link = result.items[i].videoUrl;
-                        server.queue.push(link);
+                        servers[message.guild.id].queue.push(link);
                         const streamOptions = { seek: 0, volume: volume };
                         var voiceChannel = message.member.voice.channel;
                         voiceChannel.join().then(connection => {
-                            const stream = ytdl(server.queue[0], { filter : 'audioonly' });
+                            const stream = ytdl(link, { filter : 'audioonly' });
                             const dispatcher = connection.play(stream, streamOptions);
                             dispatcher.on("finish", function() {
                                 if(!loop_enable)
                                 {
-                                    server.queue.shift();
+                                    servers[message.guild.id].queue.shift();
                                 }
-                                if(server.queue[0]){
-                                    playQueue(server.queue[0]);
+                                if(servers[message.guild.id].queue[0]){
+                                    playQueue(servers[message.guild.id].queue[0]);
                                 } else {
             
                                 }
