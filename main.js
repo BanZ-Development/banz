@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
-const colors = require('./colors.json');
-const config = require('./config.json');
+const colors = require('./hide/colors.json');
+const config = require('./hide/config.json');
 const client = new Discord.Client();
 var prefix = '>';
 const ytdl = require('ytdl-core');
@@ -8,7 +8,6 @@ var search = require('youtube-search');
 const fs = require('fs');
 const { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } = require('constants');
 var PlaylistSummary = require('youtube-playlist-summary');
-const { time } = require('console');
 var opts = {
     maxResults: 1,
     key: config["youtube-api"],
@@ -579,9 +578,9 @@ client.on('message', async message => {
                         servers[message.guild.id].queue.shift();
                     }
                     if(servers[message.guild.id].queue[0]){
-                        playQueue();
+                        skip();
                     } else {
-
+                        return;
                     }
                 });
             }).catch(err => console.log(err)); 
@@ -609,7 +608,7 @@ client.on('message', async message => {
         }).catch(err => console.log(err)); 
     }
 
-    if(command === 'skip') //complete
+    function skip()
     {
         if(message.member.permissions.has(skip_perm))
         {
@@ -638,7 +637,11 @@ client.on('message', async message => {
         {
             message.reply('It seems that you do not have the required permission ' + '`' + skip_perm + '`');
         }
+    }
 
+    if(command === 'skip') //complete
+    {
+        skip();
     }
 
     if(command === 'loop') //complete
