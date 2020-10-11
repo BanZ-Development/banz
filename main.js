@@ -347,7 +347,7 @@ client.on('message', async message => {
                     }
                     else if(message.content.startsWith('>play https://open.spotify.com/track/') || message.content.startsWith('>play https://play.spotify.com/track/'))
                     {
-                        spotifydl
+
                     }
                     else
                     {
