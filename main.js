@@ -69,7 +69,6 @@ var skip_perm = 'SEND_MESSAGES';
 
 var volume = 1;
 
-var songLimit = 10;
 
 
 var queue = [];
