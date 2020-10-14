@@ -8,7 +8,6 @@ var search = require('youtube-search');
 const fs = require('fs');
 const { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } = require('constants');
 var PlaylistSummary = require('youtube-playlist-summary');
-const { time } = require('console');
 var opts = {
     maxResults: 1,
     key: config["youtube-api"],
@@ -76,7 +75,7 @@ var songLimit = 10;
 var queue = [];
 var servers = {};
 
-var loop_enable;
+var loop_enable = false;
 
 const filterLevels = {
     DISABLED: 'Off',
@@ -277,8 +276,6 @@ client.on('message', async message => {
                     console.log("Successfully connected.");
                     connection.voice.setSelfDeaf(true);
                     play('https://www.youtube.com/watch?v=kCQAzVvz8Sg&feature=youtu.be');
-
-
                     embed = new Discord.MessageEmbed()
                     .setColor(colors.indigo)
                     .setTitle(`Joined **${channel.name}**!`)
@@ -574,14 +571,18 @@ client.on('message', async message => {
                 const stream = ytdl(link, { filter : 'audioonly' });
                 const dispatcher = connection.play(stream, streamOptions);
                 dispatcher.on("finish", function() {
-                    if(!loop_enable)
-                    {
-                        servers[message.guild.id].queue.shift();
-                    }
                     if(servers[message.guild.id].queue[0]){
-                        playQueue();
-                    } else {
+                        if(!loop_enable)
+                        {
+                            servers[message.guild.id].queue.shift();
+                            playQueue();
+                        }
+                        else {
+                            playQueue();
+                        }
 
+                    } else {
+                        return;
                     }
                 });
             }).catch(err => console.log(err)); 
@@ -590,9 +591,9 @@ client.on('message', async message => {
 
     function playQueue()
     {
+
         const streamOptions = { seek: 0, volume: volume };
         var voiceChannel = message.member.voice.channel;
-        console.log(voiceChannel);
         voiceChannel.join().then(connection => {
             const stream = ytdl(servers[message.guild.id].queue[0], { filter : 'audioonly' });
             const dispatcher = connection.play(stream, streamOptions);
@@ -601,25 +602,27 @@ client.on('message', async message => {
                 {
                     servers[message.guild.id].queue.shift();
                 }
-                else if(servers[message.guild.id].queue[0]){
+                if(servers[message.guild.id].queue[0]){
                     playQueue();
                 } else {
+                    return;
                 }
+
             });
         }).catch(err => console.log(err)); 
     }
 
-    if(command === 'skip') //complete
+    function skip()
     {
         if(message.member.permissions.has(skip_perm))
         {
             if(servers[message.guild.id].queue[0])
             {
                 servers[message.guild.id].queue.shift();
-                playQueue(servers[message.guild.id].queue[0]);
+                playQueue();
                 embed = new Discord.MessageEmbed()
                 .setColor(colors.indigo)
-                .setTitle('**Skipped Song**')
+                .setTitle('**Next Track**')
                 .setFooter(`Requested by - ${message.author.username}`);
                 message.channel.send({embed: embed});
             }
@@ -638,7 +641,11 @@ client.on('message', async message => {
         {
             message.reply('It seems that you do not have the required permission ' + '`' + skip_perm + '`');
         }
+    }
 
+    if(command === 'skip') //complete
+    {
+        skip();
     }
 
     if(command === 'loop') //complete
@@ -649,7 +656,7 @@ client.on('message', async message => {
             embed = new Discord.MessageEmbed()
             .setColor(colors.indigo)
             .setTitle('**Loop**')
-            .addField('Looping:',loop_enable)
+            .setDescription(loop_enable)
             .setFooter(`Requested by - ${message.author.username}`);
             message.channel.send({embed: embed});
         }
@@ -687,8 +694,6 @@ client.on('message', async message => {
 
     if(command === 'shuffle') //complete
     {
-
-
         if(message.member.permissions.has(shuffle_perm))
         {
             shuffle();

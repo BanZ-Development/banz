@@ -11,7 +11,7 @@
     "type": "git",
     "url": "git+https://github.com/jackgimre/banz-bot.git"
   },
-  "author": "jack/lucky",
+  "author": "jackgimre",
   "license": "ISC",
   "dependencies": {
     "discord.js": "^12.2.0",
