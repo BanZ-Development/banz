@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
-const colors = require('./colors.json');
-const config = require('./config.json');
+const colors = require('./hide/colors.json');
+const config = require('./hide/config.json');
 const client = new Discord.Client();
 var prefix = '>';
 const ytdl = require('ytdl-core');
@@ -69,7 +69,6 @@ var skip_perm = 'SEND_MESSAGES';
 
 var volume = 1;
 
-var songLimit = 10;
 
 
 var queue = [];
@@ -588,7 +587,7 @@ client.on('message', async message => {
             }).catch(err => console.log(err)); 
         }
     }
-
+    //please
     function playQueue()
     {
 
