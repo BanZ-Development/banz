@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const colors = require('./hide/colors.json');
+const colors = require('./colors.json');
 const config = require('./hide/config.json');
 const client = new Discord.Client();
 var prefix = '>';
