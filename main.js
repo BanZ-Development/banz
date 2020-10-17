@@ -140,7 +140,7 @@ client.on('message', async message => {
                 cache(config.prefix,prefix);
             }
             embed = new Discord.MessageEmbed()
-            .setColor(colors.indigo)
+            .setColor(colors.salmon)
             .setTitle('The Prefix is '+'`'+prefix+'`')
             .setFooter(`Requested by - ${message.author.username}`);
             message.channel.send({embed: embed});
@@ -157,7 +157,7 @@ client.on('message', async message => {
         {
             if(message.member.permissions.has(info_perm)) {
                 embed = new Discord.MessageEmbed()
-                .setColor(colors.indigo)
+                .setColor(colors.salmon)
                 .setTitle(`**Server Info for ${message.guild.name}**`)
                 .addField('Server:',message.guild.name)
                 .addField('ID:',message.guild.id)
@@ -183,7 +183,7 @@ client.on('message', async message => {
             if(message.member.permissions.has(help_perm))
             {
                 embed = new Discord.MessageEmbed()
-                .setColor(colors.indigo)
+                .setColor(colors.salmon)
                 .setTitle(`**Help for ${message.guild.name}**`)
                 .addField('--------------------------------------------------------------------------------------------------','**SERVER**')
                 .addField('>info','Gives server info',true)
@@ -223,7 +223,7 @@ client.on('message', async message => {
         if(message.member.permissions.has(support_perm))
         {
             embed = new Discord.MessageEmbed()
-            .setColor(colors.indigo)
+            .setColor(colors.salmon)
             .setTitle('**BanZ\'s Socials**')
             .addField('Discord:','https://discord.gg/KTGmTNK')
             .addField('Website:','https://banz-development.webflow.io/')
@@ -245,7 +245,7 @@ client.on('message', async message => {
             if(message.member.permissions.has(contact_perm))
             {
                 embed = new Discord.MessageEmbed()
-                .setColor(colors.indigo)
+                .setColor(colors.salmon)
                 .setTitle('**Contact Bot Owners for Questions**')
                 .addField('Cherry:','cherry#2222')
                 .addField('Lucky:','RaidLucky#0001')
@@ -276,7 +276,7 @@ client.on('message', async message => {
                     connection.voice.setSelfDeaf(true);
                     play('https://www.youtube.com/watch?v=kCQAzVvz8Sg&feature=youtu.be');
                     embed = new Discord.MessageEmbed()
-                    .setColor(colors.indigo)
+                    .setColor(colors.salmon)
                     .setTitle(`Joined **${channel.name}**!`)
                     .setFooter(`Requested by - ${message.author.username}`);
                     message.channel.send({embed: embed});
@@ -306,7 +306,7 @@ client.on('message', async message => {
                 if(!args[0])
                 {
                     embed = new Discord.MessageEmbed()
-                    .setColor(colors.indigo)
+                    .setColor(colors.salmon)
                     .setTitle(`**Incorrect Syntax**!`)
                     .addField('Syntax:','>play [link or title]')
                     .setFooter(`Requested by - ${message.author.username}`);
@@ -342,7 +342,7 @@ client.on('message', async message => {
                             if(!servers[message.guild.id].queue[0])
                             {
                                 embed = new Discord.MessageEmbed()
-                                .setColor(colors.indigo)
+                                .setColor(colors.salmon)
                                 .setTitle(`**${results.results[0].title}**`)
                                 .addField('Channel',results.results[0].channelTitle)
                                 .addField('URL',results.results[0].link)
@@ -379,7 +379,7 @@ client.on('message', async message => {
                     streamOptions = { seek: 0, volume: server.volume };
         
                     embed = new Discord.MessageEmbed()
-                    .setColor(colors.indigo)
+                    .setColor(colors.salmon)
                     .setTitle(`**Volume Changed**!`)
                     .setDescription(`The volume has been changed to **${server.volume}**`)
                     .setFooter(`Requested by - ${message.author.username}`);
@@ -388,7 +388,7 @@ client.on('message', async message => {
                 else
                 {
                     embed = new Discord.MessageEmbed()
-                    .setColor(colors.indigo)
+                    .setColor(colors.salmon)
                     .setTitle('The current volume level is '+'`'+server.volume+'`')
                     .setFooter(`Requested by - ${message.author.username}`);
                     message.channel.send({embed: embed});
@@ -425,7 +425,7 @@ client.on('message', async message => {
                 message.guild.me.voice.channel.leave();
                 console.log("Successfully disconnected.");
                 embed = new Discord.MessageEmbed()
-                .setColor(colors.indigo)
+                .setColor(colors.salmon)
                 .setTitle(`Leaving **${message.guild.me.voice.channel.name}**!`)
                 .setFooter(`Requested by - ${message.author.username}`);
                 message.channel.send({embed: embed});
@@ -448,7 +448,7 @@ client.on('message', async message => {
             if(message.member.permissions.has(featured_perm))
             {
                 embed = new Discord.MessageEmbed()
-                .setColor(colors.indigo)
+                .setColor(colors.salmon)
                 .setTitle('**Featured Servers**')
                 .addField('Citlalli:','https://discord.com/invite/CMmkPtn')
                 .addField('Elseco:','https://discord.com/invite/ABu3xud')
@@ -474,7 +474,7 @@ client.on('message', async message => {
             if(message.member.permissions.has(request_perm))
             {
                 embed = new Discord.MessageEmbed()
-                .setColor(colors.indigo)
+                .setColor(colors.salmon)
                 .setTitle('**Bot Requests/Ideas**')
                 .addField('Google Form:','https://google.com')
                 .setFooter(`Requested by - ${message.author.username}`);
@@ -505,7 +505,7 @@ client.on('message', async message => {
             if(message.member.permissions.has(prefix_perm))
             {
                 embed = new Discord.MessageEmbed()
-                .setColor(colors.indigo)
+                .setColor(colors.salmon)
                 .setTitle('The Prefix is '+'`'+prefix+'`')
                 .setFooter(`Requested by - ${message.author.username}`);
                 message.channel.send({embed: embed});
@@ -531,7 +531,7 @@ client.on('message', async message => {
                 var pollArray = pollMsg[1].split(';');
                 message.delete();
                 embed = new Discord.MessageEmbed()
-                .setColor(colors.indigo)
+                .setColor(colors.salmon)
                 .setTitle(`**${pollArray[0]}**`)
                 .addField('**Option 1**:',pollArray[1])
                 .addField('**Option 2**:',pollArray[2])
@@ -555,7 +555,7 @@ client.on('message', async message => {
         {
             servers[message.guild.id].queue.push(link);
             embed = new Discord.MessageEmbed()
-            .setColor(colors.indigo)
+            .setColor(colors.salmon)
             .setTitle(`**Added to Queue**`)
             .addField('URL:',link)
             .setFooter(`Requested by - ${message.author.username}`);
@@ -620,7 +620,7 @@ client.on('message', async message => {
                 servers[message.guild.id].queue.shift();
                 playQueue();
                 embed = new Discord.MessageEmbed()
-                .setColor(colors.indigo)
+                .setColor(colors.salmon)
                 .setTitle('**Next Track**')
                 .setFooter(`Requested by - ${message.author.username}`);
                 message.channel.send({embed: embed});
@@ -628,7 +628,7 @@ client.on('message', async message => {
             else
             {
                 embed = new Discord.MessageEmbed()
-                .setColor(colors.indigo)
+                .setColor(colors.salmon)
                 .setTitle('**ERROR**')
                 .addField('Error:','You can\'t skip if nothing is in the queue')
                 .addField('Queue:',servers[message.guild.id].queue)
@@ -653,7 +653,7 @@ client.on('message', async message => {
         {
             loop_enable = !loop_enable;
             embed = new Discord.MessageEmbed()
-            .setColor(colors.indigo)
+            .setColor(colors.salmon)
             .setTitle('**Loop**')
             .setDescription(loop_enable)
             .setFooter(`Requested by - ${message.author.username}`);
@@ -673,7 +673,7 @@ client.on('message', async message => {
             if(message.member.permissions.has(queue_perm))
             {
                 embed = new Discord.MessageEmbed()
-                .setColor(colors.indigo)
+                .setColor(colors.salmon)
                 .setTitle('**Queue**')
                 .addField('Length:',servers[message.guild.id].queue.length)
                 .setFooter(`Requested by - ${message.author.username}`);
@@ -697,7 +697,7 @@ client.on('message', async message => {
         {
             shuffle();
             embed = new Discord.MessageEmbed()
-            .setColor(colors.indigo)
+            .setColor(colors.salmon)
             .setTitle('**Queue Shuffled**')
             .setFooter(`Requested by - ${message.author.username}`);
             message.channel.send({embed: embed});
@@ -722,7 +722,7 @@ client.on('message', async message => {
             {
                 servers[message.guild.id].queue = [];
                 embed = new Discord.MessageEmbed()
-                .setColor(colors.indigo)
+                .setColor(colors.salmon)
                 .setTitle('**Queue Cleared**')
                 .setFooter(`Requested by - ${message.author.username}`);
                 message.channel.send({embed: embed});
@@ -743,7 +743,7 @@ client.on('message', async message => {
         function radios()
         {
             embed = new Discord.MessageEmbed()
-            .setColor(colors.indigo)
+            .setColor(colors.salmon)
             .setTitle('**Radio Stations**')
             .addField('Popular','`>radio pop`',true)
             .addField('Juice WRLD','`>radio juice`',true)
@@ -845,7 +845,7 @@ client.on('message', async message => {
                     if(servers[message.guild.id].queue.length-total==previousQueue)
                     {
                         embed = new Discord.MessageEmbed()
-                        .setColor(colors.indigo)
+                        .setColor(colors.salmon)
                         .setTitle('Now Playing: `'+totalInt+'` Tracks')
                         .addField('Playlist:',result.playlistTitle)
                         .setFooter(`Requested by - ${message.author.username}`);
